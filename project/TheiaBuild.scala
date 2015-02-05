@@ -25,7 +25,8 @@ object TheiaBuild extends Build {
       "-unchecked",
       "-deprecation",
       "-feature",
-      "-language:postfixOps"
+      "-language:postfixOps",
+      "-language:implicitConversions"
     )
   )
 
