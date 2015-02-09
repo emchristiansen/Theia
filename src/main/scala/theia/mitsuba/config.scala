@@ -4,12 +4,12 @@ import theia._
 import theia.MSR._
 
 trait ShowXML[T] {
-  def toXML(x: T): String
+  def show(x: T): String
 }
 
 object Config {
   implicit object ShowXMLIntegrator extends ShowXML[Integrator] {
-    override def toXML(i: Integrator) = i match {
+    override def show(i: Integrator) = i match {
       case RGB => "<integrator type=\"path\"/>"
       case Position =>
         """
@@ -29,7 +29,7 @@ object Config {
   def formatVector(v: Vector3D): String = s"$v.data(0),$v.data(1),$v.data(2)"
 
   implicit object ShowXMLSensorInt extends ShowXML[(Sensor, Int)] {
-    override def toXML(si: (Sensor, Int)) = {
+    override def show(si: (Sensor, Int)) = {
       val (s, numChannels) = si
       assert(numChannels == 1 || numChannels == 3)
 

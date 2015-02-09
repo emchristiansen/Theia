@@ -14,6 +14,7 @@ object TheiaBuild extends Build {
   def extraLibraryDependencies = Seq(
     libraryDependencies ++= Seq(
       "org.scalanlp" %% "breeze" % "0.10",
+      "commons-io" % "commons-io" % "2.4",
       "com.google.cloud.dataflow" % "google-cloud-dataflow-java-sdk-all" % "0.3.150109"
     )
   )
