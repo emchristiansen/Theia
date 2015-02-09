@@ -17,3 +17,7 @@ project/plugins/project/
 .worksheet
 
 .ensime*
+.cache
+.classpath
+.project
+.settings
