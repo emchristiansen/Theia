@@ -1,6 +1,6 @@
 package theia.mitsuba
 
-import theia.View
+import theia._
 import theia.mitsuba.Config._
 import theia.Integrator
 import theia.Sensor
@@ -8,6 +8,9 @@ import scala.util.Random
 import java.io.File
 import org.apache.commons.io.FileUtils
 import scala.sys.process._
+import com.github.tototoshi.csv._
+import theia.MSR._
+import breeze.linalg.DenseMatrix
 
 object Render {
   def makeMitsubaScript(template: String, numChannels: Int, v: View): String = {
@@ -31,11 +34,11 @@ object Render {
 
     return (directory, scriptFile)
   }
-  
+
   def callMitsuba(scriptPath: File, outPath: File) {
     s"/usr/bin/mitsuba $scriptPath -o $outPath" !
   }
-  
+
   def makePythonScript(numChannels: Int, npyPath: File, csvPattern: (Int => String)): String = {
     val first = s"""
 import numpy
@@ -49,7 +52,42 @@ if len(arr.shape) == 2:
 numpy.savetxt("$cpi", arr[:, :, $channel], delimiter=",")
 """
     }
-    
+
     (first :: (0 until numChannels).toList.map(save)).mkString("\n")
   }
+
+  def loadCSVs(numChannels: Int, csvPattern: (Int => String)): List[List[List[Double]]] = {
+    for (c <- (0 until numChannels).toList) yield {
+      val reader = CSVReader.open(new File(csvPattern(c)))
+      reader.all.map(_.map(_.toDouble))
+    }
+  }
+
+  def parseRenderingComponent(numChannels: Int, csv: List[List[List[Double]]]): Either[Matrix1, Matrix3] = {
+    assert(numChannels == 1 || numChannels == 3)
+    assert(csv.size > 0)
+    assert(csv(0).size > 0)
+    assert(csv(0)(0).size == numChannels)
+    
+    val numRows = csv.size
+    val numColumns = csv(0).size
+    
+    if (numChannels == 1) {
+      Left(DenseMatrix.tabulate[Double](numRows, numColumns){
+        case (r, c) => csv(r)(c)(0)
+      })
+    } else {
+      Right(DenseMatrix.tabulate[(Double, Double, Double)](numRows, numColumns){
+        case (r, c) => (csv(r)(c)(0), csv(r)(c)(1), csv(r)(c)(2))
+      })
+    }
+  }
+  
+  def renderComponent(m: Model, v: View): Either[Matrix1, Matrix3] = {
+//    FileUtils.readFileToString(new File(m.directory.file)
+    ???
+  }
 }
+
+
+

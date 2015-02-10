@@ -8,7 +8,7 @@ trait Box[A] {
   val data: A
 }
 
-case class Model(val files: List[Byte], val sceneTemplatePath: String)
+case class Model(val zippedDirectory: List[Byte], val sceneTemplatePath: String)
 
 sealed abstract class Integrator
 object RGB extends Integrator
