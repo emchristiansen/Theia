@@ -72,5 +72,5 @@ object MSR {
 
   implicit def unBox[A](b: Box[A]): A = b.data
 
-  type Renderer = Model => Sensor => Rendering
+  type Renderer = (Model, Sensor) => Rendering
 }
