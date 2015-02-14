@@ -26,7 +26,12 @@ object Config {
     }
   }
 
-  def formatVector(v: Vector3D): String = s"$v.data(0),$v.data(1),$v.data(2)"
+  def formatVector(v: Vector3D): String = {
+    val x0 = v.data(0)
+    val x1 = v.data(1)
+    val x2 = v.data(2)
+    s"$x0,$x1,$x2"
+  }
 
   implicit object ShowXMLSensorInt extends ShowXML[(Sensor, Int)] {
     override def show(si: (Sensor, Int)) = {

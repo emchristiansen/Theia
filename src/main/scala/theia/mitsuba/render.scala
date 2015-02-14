@@ -12,14 +12,21 @@ import com.github.tototoshi.csv._
 import theia.MSR._
 import breeze.linalg.DenseMatrix
 import org.zeroturnaround.zip.ZipUtil
+import st.sparse.sundry.ExistingDirectory
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 
 object Render {
   def makeMitsubaScript(template: String, numChannels: Int, v: View): String = {
+    assert(template.contains("$INTEGRATOR"))
+    assert(template.contains("$SENSOR"))
+    
     val sxi = implicitly[ShowXML[Integrator]]
     val sxsi = implicitly[ShowXML[(Sensor, Int)]]
 
     val replacedIntegrator = template.replace("$INTEGRATOR", sxi.show(v.integrator))
-    template.replace("$SENSOR", sxsi.show((v.sensor, numChannels)))
+    replacedIntegrator.replace("$SENSOR", sxsi.show((v.sensor, numChannels)))
   }
 
   //  def makeSceneDirectory(modelDirectory: File, mitsubaScript: String): (File, File) = {
@@ -36,17 +43,17 @@ object Render {
   //    return (directory, scriptFile)
   //  }
 
-  val workDirectory = new File("/tmp/theia")
-
-  def ensureWorkDirectoryExists() {
-    if (!workDirectory.isDirectory()) {
-      workDirectory.mkdir()
+  val workDirectory = {
+    val d = new File("/tmp/theia")
+    if (!d.isDirectory()) {
+      d.mkdir()
     }
+    ExistingDirectory(d)
   }
 
-  def zip(directory: File): List[Byte] = {
+  def zip(directory: File): List[Byte] = {   
     val tf = File.createTempFile("directory_to_zip", ".zip", workDirectory)
-    ZipUtil.pack(directory, tf);
+    ZipUtil.pack(directory, tf)
     FileUtils.readFileToByteArray(tf).toList
   }
 
@@ -57,22 +64,24 @@ object Render {
   }
 
   def makeSceneDirectory(zippedDirectory: List[Byte]): File = {
-    val td = File.createTempFile("scene", "", workDirectory)
+    val td = new File(Files.createTempDirectory(Paths.get(workDirectory.getCanonicalPath), "scene").toString)
     unzip(zippedDirectory, td)
     td
-
-    //    assert(new File(td, m.sceneTemplatePath).isFile())
-
+  }
+  
+  def callShell(command: String) {
+    println(s"Executing command line:\n$command")
+    command !
   }
 
   def callMitsuba(scriptPath: File, outPath: File) {
-    s"/usr/bin/mitsuba $scriptPath -o $outPath" !
+    callShell(s"/usr/bin/mitsuba $scriptPath -o $outPath")
   }
 
   def makePythonScript(numChannels: Int, npyPath: File, csvPattern: (Int => File)): String = {
     val first = s"""
 import numpy
-arr = numpy.load("$npyPath"")
+arr = numpy.load("$npyPath")
 if len(arr.shape) == 2:
   arr = numpy.reshape(arr, (arr.shape[0], arr.shape[1], 1))
 """
@@ -95,20 +104,20 @@ numpy.savetxt("$cpi", arr[:, :, $channel], delimiter=",")
 
   def parseRenderingComponent(numChannels: Int, csv: List[List[List[Double]]]): Either[Matrix1, Matrix3] = {
     assert(numChannels == 1 || numChannels == 3)
-    assert(csv.size > 0)
+    assert(csv.size == numChannels)
     assert(csv(0).size > 0)
-    assert(csv(0)(0).size == numChannels)
+    assert(csv(0)(0).size > 0)
 
-    val numRows = csv.size
-    val numColumns = csv(0).size
+    val numRows = csv(0).size
+    val numColumns = csv(0)(0).size
 
     if (numChannels == 1) {
       Left(DenseMatrix.tabulate[Double](numRows, numColumns) {
-        case (r, c) => csv(r)(c)(0)
+        case (r, c) => csv(0)(r)(c)
       })
     } else {
       Right(DenseMatrix.tabulate[(Double, Double, Double)](numRows, numColumns) {
-        case (r, c) => (csv(r)(c)(0), csv(r)(c)(1), csv(r)(c)(2))
+        case (r, c) => (csv(0)(r)(c), csv(1)(r)(c), csv(2)(r)(c))
       })
     }
   }
@@ -138,7 +147,7 @@ numpy.savetxt("$cpi", arr[:, :, $channel], delimiter=",")
     val pythonScriptPath = new File(sd, "npy_to_csvs.py")
     FileUtils.writeStringToFile(pythonScriptPath, ps)
 
-    s"/usr/bin/python $pythonScriptPath" !
+    callShell(s"/usr/bin/python $pythonScriptPath")
     
     val csvs = loadCSVs(numChannels, csvPattern)
     parseRenderingComponent(numChannels, csvs)

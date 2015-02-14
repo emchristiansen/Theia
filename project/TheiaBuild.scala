@@ -16,6 +16,7 @@ object TheiaBuild extends Build {
       "org.scalanlp" %% "breeze" % "0.10",
       "commons-io" % "commons-io" % "2.4",
       "com.github.tototoshi" %% "scala-csv" % "1.1.2",
+      "st.sparse" %% "sundry" % "0.1.3-SNAPSHOT",
       "org.zeroturnaround" % "zt-zip" % "1.8",
       "com.google.guava" % "guava" % "18.0",
       "com.google.cloud.dataflow" % "google-cloud-dataflow-java-sdk-all" % "0.3.150109"

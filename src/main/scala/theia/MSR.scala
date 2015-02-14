@@ -1,6 +1,7 @@
 package theia
 
 import breeze.linalg._
+import org.scalatest.Assertions._
 
 import MSR._
 
@@ -24,6 +25,10 @@ case class Vector3D(data: DenseVector[Double]) extends Box[DenseVector[Double]] 
   assert(data.size == 3)
 }
 
+object Vector3D {
+  def apply(x0: Double, x1: Double, x2: Double): Vector3D = Vector3D(DenseVector(x0, x1, x2))
+}
+
 case class Origin(data: Vector3D) extends Box[Vector3D]
 
 case class LookDirection(data: Vector3D) extends Box[Vector3D] {
@@ -31,7 +36,7 @@ case class LookDirection(data: Vector3D) extends Box[Vector3D] {
 }
 
 case class Up(data: Vector3D) extends Box[Vector3D] {
-    // TODO(emchristiansen): Ensure this is unit length.
+  // TODO(emchristiansen): Ensure this is unit length.
 }
 
 case class CameraFrame(
