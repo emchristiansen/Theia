@@ -1,7 +1,7 @@
 package theia
 
 import breeze.linalg._
-import org.scalatest.Assertions._
+import org.scalatest.DiagrammedAssertions._
 
 import MSR._
 
