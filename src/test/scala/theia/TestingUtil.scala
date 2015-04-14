@@ -10,7 +10,7 @@ import scala.pickling.binary._
 import scala.util.Random
 import theia.mitsuba.Render
 
-trait TestUtil extends Logging {
+trait TestingUtil extends Logging {
   lazy val configureLogger = {
     // Must be one of: "trace", "debug", "info", "warn", or "error".
     System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "info")
