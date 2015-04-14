@@ -4,10 +4,7 @@ import breeze.linalg._
 import org.scalatest.DiagrammedAssertions._
 
 import MSR._
-
-trait Box[A] {
-  val data: A
-}
+import st.sparse.sundry.Box
 
 case class Model(val zippedDirectory: List[Byte], val sceneTemplatePath: String)
 
@@ -53,7 +50,7 @@ case class Sensor(cameraFrame: CameraFrame, resolution: Int, sampleCount: Int)
 case class View(integrator: Integrator, sensor: Sensor)
 
 case class RGBImage(data: Matrix3) extends Box[Matrix3] {
-  // TODO(ericmc): Assert that all values are in [0, 1].
+  // TODO(emchristiansen): Assert that all values are in [0, 1].
 }
 
 case class PositionMap(data: Matrix3) extends Box[Matrix3]
