@@ -17,10 +17,15 @@ class TestMitsuba extends FunGeneratorSuite with TestingUtil {
 
     val rendering = Render.render(m, s)
 
-    val rgbImage = Util.matrix3ToImage(rendering.rgb)
+    val rgbImage = Util.matrix3ToImage(Util.gammaCorrect(rendering.rgb))
     val rgbFile = new File(outputRoot, "mitsuba_rgb.png")
     println(s"About to write: $rgbFile")
     ImageIO.write(rgbImage.awt, "png", rgbFile)
+
+    val depthImage = Util.matrix1ToImage(rendering.depth)
+    val depthFile = new File(outputRoot, "mitsuba_depth.png")
+    println(s"About to write: $depthFile")
+    ImageIO.write(depthImage.awt, "png", depthFile)
 
     //    val m = DenseMatrix.tabulate[(Double, Double, Double)](64, 64) {
     //      case (r, c) => (r.toDouble, c.toDouble, sin(r / 16.0))

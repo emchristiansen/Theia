@@ -72,7 +72,10 @@ object MSR {
   type Matrix1 = DenseMatrix[Double]
   type Matrix3 = DenseMatrix[(Double, Double, Double)]
 
-  implicit def unBox[A](b: Box[A]): A = b.data
+  type Matrix1Safe = DenseMatrix[Option[Double]]
+  type Matrix3Safe = DenseMatrix[Option[(Double, Double, Double)]]
+
+//  implicit def unBox[A](b: Box[A]): A = b.data
 
   type Renderer = (Model, Sensor) => Rendering
 }
