@@ -20,11 +20,11 @@ import java.io.File
 @RunWith(classOf[JUnitRunner])
 class TestUtil extends FunGeneratorSuite with TestingUtil {
   test("matrix to image", MediumTest, InteractiveTest) {
-    val m = DenseMatrix.tabulate[(Double, Double, Double)](64, 64) {
-      case (r, c) => (r.toDouble, c.toDouble, sin(r / 16.0))
+    val m = DenseMatrix.tabulate[Option[(Double, Double, Double)]](64, 64) {
+      case (r, c) => Some((r.toDouble, c.toDouble, sin(r / 16.0)))
     }
     
-    val i = Util.matrix3ToImage(m)
+    val i = Util.matrix3SafeToImage(m)
     
     val f = new File(outputRoot, "matrix_to_image.png")
     println(s"About to write: $f")

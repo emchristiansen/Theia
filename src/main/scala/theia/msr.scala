@@ -49,13 +49,13 @@ case class Sensor(cameraFrame: CameraFrame, resolution: Int, sampleCount: Int)
 
 case class View(integrator: Integrator, sensor: Sensor)
 
-case class RGBImage(data: Matrix3) extends Box[Matrix3] {
+case class RGBImage(data: Matrix3Safe) extends Box[Matrix3Safe] {
   // TODO(emchristiansen): Assert that all values are in [0, 1].
 }
 
-case class PositionMap(data: Matrix3) extends Box[Matrix3]
+case class PositionMap(data: Matrix3Safe) extends Box[Matrix3Safe]
 
-case class DepthMap(data: Matrix1) extends Box[Matrix1] {
+case class DepthMap(data: Matrix1Safe) extends Box[Matrix1Safe] {
   // TODO(emchristiansen): Assert that all values are positive.
 }
 

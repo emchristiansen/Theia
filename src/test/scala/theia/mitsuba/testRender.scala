@@ -17,12 +17,17 @@ class TestMitsuba extends FunGeneratorSuite with TestingUtil {
 
     val rendering = Render.render(m, s)
 
-    val rgbImage = Util.matrix3ToImage(Util.gammaCorrect(rendering.rgb))
+    val rgbImage = Util.matrix3SafeToImage(Util.gammaCorrectSafe(rendering.rgb))
     val rgbFile = new File(outputRoot, "mitsuba_rgb.png")
     println(s"About to write: $rgbFile")
     ImageIO.write(rgbImage.awt, "png", rgbFile)
 
-    val depthImage = Util.matrix1ToImage(rendering.depth)
+    val positionImage = Util.matrix3SafeToImage(rendering.position)
+    val positionFile = new File(outputRoot, "mitsuba_position.png")
+    println(s"About to write: $positionFile")
+    ImageIO.write(positionImage.awt, "png", positionFile)
+
+    val depthImage = Util.matrix1SafeToImage(rendering.depth)
     val depthFile = new File(outputRoot, "mitsuba_depth.png")
     println(s"About to write: $depthFile")
     ImageIO.write(depthImage.awt, "png", depthFile)

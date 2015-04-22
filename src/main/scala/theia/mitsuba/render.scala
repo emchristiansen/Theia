@@ -123,7 +123,18 @@ numpy.savetxt("$cpi", arr[:, :, $channel], delimiter=",")
     }
   }
 
-  def renderComponent(m: Model, v: View): Either[Matrix1, Matrix3] = {
+  def doubleOrNone(x: Double): Option[Double] = {
+    val kLegalDoubleBound = math.pow(10, 10)
+    if (x.abs < kLegalDoubleBound) Some(x) else None
+  }
+
+  def matrix1ToSafe(m: Matrix1) = m.mapValues(doubleOrNone)
+
+  def matrix3ToSafe(m: Matrix3) = m.mapValues({case (x, y, z) => {
+    doubleOrNone(x).flatMap(_ => doubleOrNone(y)).flatMap(_ => doubleOrNone(z)).map(_ => (x, y, z))
+  }})
+
+  def renderComponent(m: Model, v: View): Either[Matrix1Safe, Matrix3Safe] = {
     println(s"Rendering component: $v.integrator")
     
     val sd = makeSceneDirectory(m.zippedDirectory)
@@ -155,7 +166,10 @@ numpy.savetxt("$cpi", arr[:, :, $channel], delimiter=",")
     callShell(s"docker run -t -v $wd:$wd emchristiansen/mitsubadocker /usr/bin/python $pythonScriptPath")
     
     val csvs = loadCSVs(numChannels, csvPattern)
-    parseRenderingComponent(numChannels, csvs)
+    parseRenderingComponent(numChannels, csvs) match {
+      case Left(m) => Left(matrix1ToSafe(m))
+      case Right(m) => Right(matrix3ToSafe(m))
+    }
   }
   
   def render: Renderer = (m, s) => {
