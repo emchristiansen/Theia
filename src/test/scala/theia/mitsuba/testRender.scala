@@ -31,15 +31,5 @@ class TestMitsuba extends FunGeneratorSuite with TestingUtil {
     val depthFile = new File(outputRoot, "mitsuba_depth.png")
     println(s"About to write: $depthFile")
     ImageIO.write(depthImage.awt, "png", depthFile)
-
-    //    val m = DenseMatrix.tabulate[(Double, Double, Double)](64, 64) {
-    //      case (r, c) => (r.toDouble, c.toDouble, sin(r / 16.0))
-    //    }
-    //
-    //    val i = Util.matrix3ToImage(m)
-    //
-    //    val f = new File(outputRoot, "matrix_to_image.png")
-    //    println(s"About to write: $f")
-    //    ImageIO.write(i.awt, "png", f)
   }
 }
