@@ -75,7 +75,8 @@ object Render {
   }
 
   def callMitsuba(scriptPath: File, outPath: File) {
-    callShell(s"/usr/bin/mitsuba $scriptPath -o $outPath")
+    val wd = workDirectory.data
+    callShell(s"docker run -t -v $wd:$wd emchristiansen/mitsubadocker /usr/bin/mitsuba $scriptPath -o $outPath")
   }
 
   def makePythonScript(numChannels: Int, npyPath: File, csvPattern: (Int => File)): String = {
@@ -140,6 +141,9 @@ numpy.savetxt("$cpi", arr[:, :, $channel], delimiter=",")
     val npyPath = new File(sd, "render.npy")
 
     callMitsuba(mitsubaScriptPath, npyPath)
+    // TODO(emchristiansen): For some reason the results of the first Docker call don't seem to become
+    // immediately visible in the filesystem.
+    Thread.sleep(1000)
 
     def csvPattern(channel: Int): File = new File(sd, s"render_$channel.csv")
 
@@ -147,7 +151,8 @@ numpy.savetxt("$cpi", arr[:, :, $channel], delimiter=",")
     val pythonScriptPath = new File(sd, "npy_to_csvs.py")
     FileUtils.writeStringToFile(pythonScriptPath, ps)
 
-    callShell(s"/usr/bin/python $pythonScriptPath")
+    val wd = workDirectory.data
+    callShell(s"docker run -t -v $wd:$wd emchristiansen/mitsubadocker /usr/bin/python $pythonScriptPath")
     
     val csvs = loadCSVs(numChannels, csvPattern)
     parseRenderingComponent(numChannels, csvs)
@@ -155,9 +160,12 @@ numpy.savetxt("$cpi", arr[:, :, $channel], delimiter=",")
   
   def render: Renderer = (m, s) => {
     println("Rendering all 3 components")
-    
+
+    println("Rendering RGB")
     val rgb = renderComponent(m, View(RGB, s)).right.get
+    println("Rendering position")
     val p = renderComponent(m, View(Position, s)).right.get
+    println("Rendering depth")
     val d = renderComponent(m, View(Depth, s)).left.get
     
     Rendering(RGBImage(rgb), PositionMap(p), DepthMap(d))

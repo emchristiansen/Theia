@@ -12,8 +12,8 @@ import theia._
 class TestMitsuba extends FunGeneratorSuite with TestingUtil {
   test("use Mitsuba to render a scene", MediumTest, InteractiveTest) {
     val m = Model(zippedCBox, "scene_template.xml")
-    val cf = CameraFrame(Degrees(40), Origin(Vector3D(1, 2, 3)), LookDirection(Vector3D(1, 2, 3)), Up(Vector3D(1, 2, 3)))
-    val s = Sensor(cf, 256, 16)
+    val cf = CameraFrame(Degrees(40), Origin(Vector3D(278, 273, -800)), LookDirection(Vector3D(0, 0, 1)), Up(Vector3D(0, 1, 0)))
+    val s = Sensor(cf, 256, 32)
 
     val rendering = Render.render(m, s)
 
